@@ -3,8 +3,6 @@ import tensorflow.keras.backend as K
 from tensorflow.keras import Model, layers
 from tensorflow.python.framework.convert_to_constants import  convert_variables_to_constants_v2_as_graph
 
-from lib.generator import Generator
-from lib.denoiser import Denoiser
 from network.upscaler import Upscaler
 from network.upscaler_small import UpscalerSmall
 
@@ -32,9 +30,9 @@ def create_upscaler_model(input_width = None, input_height  = None, compile = Tr
         print('Number of flops for model: {:,}'.format(flops))
     
     if small:
-        upscaler.load_weights('data/model/upscaler_weights.h5')
+        pass #upscaler.load_weights('data/model/upscaler_weights.h5')
     else:
-        upscaler.load_weights('data/model/upscaler_weights.h5')
+        pass #upscaler.load_weights('data/model/upscaler_weights.h5')
 
     tf.keras.utils.plot_model(upscaler, 'upscaler.png')
 

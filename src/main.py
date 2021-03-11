@@ -3,7 +3,7 @@ import argparse
 import numpy as np
 import os, time, cv2, random
 
-from lib.model import create_model, create_pre_gen_model, create_upscaler_model, create_denoiser_model
+from lib.model import create_model, create_pre_gen_model, create_upscaler_model
 
 physical_devices = tf.config.list_physical_devices('GPU')
 try: tf.config.experimental.set_memory_growth(physical_devices[0], True)

@@ -6,8 +6,10 @@ class UpscalerSmall(Model):
     def __init__(self):
         super(UpscalerSmall, self).__init__()
     
-    def build_details(self, input, features = 3, kernels = 1, activation = 'tanh'):
-        feature = layers.SeparableConv2D(features, kernels, strides = 1, padding = 'same', activation = activation)(input)
+    def feature_map_frame(self, input, features, min_kernels, max_kernels):
+        feature = layers.SeparableConv2D(features, min_kernels, strides = 1, padding = 'same')(input)
+        feature = layers.SeparableConv2D(features, max_kernels, strides = 1, padding = 'same')(feature)
+
         feature = layers.BatchNormalization()(feature)
         feature = layers.PReLU(shared_axes = [1, 2])(feature)
 
@@ -18,30 +20,29 @@ class UpscalerSmall(Model):
         fi1 = layers.Input(shape = fi1, name = 'fi1')
         fi0 = layers.Input(shape = fi0, name = 'fi0')
 
-        # large features
-        fi2_lf = self.build_details(fi2, 6, 3, 'relu')
-        fi1_lf = self.build_details(fi1, 6, 3, 'relu')
-        fi0_lf = self.build_details(fi0, 6, 3, 'relu')
+        # feature maps
+        fi2fm = self.feature_map_frame(fi2, 3, 1, 3)
+        fi1fm = self.feature_map_frame(fi1, 3, 1, 3)
+        fi0fm = self.feature_map_frame(fi0, 3, 1, 3)
 
-        # medium features
-        fi2_mf = self.build_details(fi2, 3, 3, 'relu')
-        fi1_mf = self.build_details(fi1, 3, 3, 'relu')
-        fi0_mf = self.build_details(fi0, 3, 3, 'relu')
+        net = layers.concatenate([ fi2fm, fi1fm, fi0fm ])
 
-        # concatenate features
-        fi2_cf = self.build_details(fi2, 3, 1, 'tanh')
-        fi1_cf = self.build_details(fi1, 3, 1, 'tanh')
-        fi0_cf = self.build_details(fi0, 3, 1, 'tanh')
+        net = layers.SeparableConv2D(3, 1, strides = 1, padding = 'same')(net)
+        net = layers.LeakyReLU(0.8)(net)
+        
+        net_1 = layers.BatchNormalization()(net)
+        net_1 = layers.SeparableConv2D(16, 1, strides = 1, padding = 'same')(net_1)
+        net_1 = layers.PReLU(shared_axes = [1, 2])(net_1)
 
-        fi2f = layers.concatenate([ fi2_lf, fi2_mf, fi2_cf ], name = 'fi2f_concatenate')
-        fi1f = layers.concatenate([ fi1_lf, fi1_mf, fi1_cf ], name = 'fi1f_concatenate')
-        fi0f = layers.concatenate([ fi0_lf, fi0_mf, fi0_cf ], name = 'fi0f_concatenate')
+        net_2 = layers.BatchNormalization()(net)
+        net_2 = layers.SeparableConv2D(16, 1, strides = 1, padding = 'same')(net_2)
+        net_2 = layers.PReLU(shared_axes = [1, 2])(net_2)
 
-        base_net = layers.SeparableConv2D(24, 1, strides = 1, padding = 'same')(fi0f)
-        base_net = layers.BatchNormalization()(base_net)
-        base_net = layers.LeakyReLU(1)(base_net)
+        net_3 = layers.BatchNormalization()(net)
+        net_3 = layers.SeparableConv2D(16, 1, strides = 1, padding = 'same')(net_3)
+        net_3 = layers.PReLU(shared_axes = [1, 2])(net_3)
 
-        net = layers.concatenate([ fi2f, fi1f, base_net ])
+        net = layers.concatenate([ net_1, net_2, net_3 ])
         net = tf.nn.depth_to_space(net, 4)
 
         return Model(inputs = [ fi2, fi1, fi0 ], outputs = net, name = name)
