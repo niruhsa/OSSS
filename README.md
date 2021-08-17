@@ -1,16 +1,16 @@
 # Open Source Super Sampling (OSSS)
 
 ## What is this?
-This is DLSS, but probs shittier and trained very poorly. Able to get < 16ms/frame (Usually 10ms/frame on average) upscaling to 4k on a 3090, but your mileage may vary, does support non RTX cards as long as you have CUDA and CUDnn installed.
+This is DLSS, but probs worse and trained very poorly. Able to get < 16ms/frame (Usually 10ms/frame on average) upscaling to 4k on a 3090, but your mileage may vary, does support non RTX cards as long as you have CUDA and CUDnn installed.
 
 ## Why use it?
-'Cause it beats shit like Waifu2X that takes fucking aeons to upscale high res pics.
+'Cause it beats stuff like Waifu2X that takes aeons to upscale high res pics.
 
 ## What can you use it for?
-Cute idols, mainly.
+Anything
 
 ## What has been tested?
-Cute idols, mainly.
+Anything
 
 Also space photos & video game footage.
 
